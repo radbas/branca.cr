@@ -1,0 +1,9 @@
+name: branca
+version: 0.1.0
+
+authors:
+  - Johannes Rabausch <mail@jrabausch.de>
+
+crystal: 1.8.2
+
+license: MIT
