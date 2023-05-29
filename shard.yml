@@ -4,6 +4,13 @@ version: 0.1.0
 authors:
   - Johannes Rabausch <mail@jrabausch.de>
 
+dependencies:
+  monocypher:
+    github: konovod/monocypher.cr
+    version: ~> 4.0.1
+  base62:
+    github: Sija/base62.cr
+  
 crystal: 1.8.2
 
 license: MIT
