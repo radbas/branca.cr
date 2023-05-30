@@ -21,7 +21,9 @@ struct Branca
     @key = StaticArray(UInt8, 32).new { |i| key[i] }
   end
 
-  def encode(payload : Bytes, timestamp : UInt32 = Time.utc.to_unix.to_u32) : String
+  def encode(payload : String | Bytes, timestamp : UInt32 = Time.utc.to_unix.to_u32) : String
+    payload = payload.to_slice
+
     time = Bytes.new(4)
     BigEndian.encode(timestamp, time)
 
