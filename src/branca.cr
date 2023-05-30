@@ -38,7 +38,8 @@ struct Branca
     time = Bytes.new(4)
     BigEndian.encode(timestamp, time)
 
-    nonce = Nonce.new.to_slice
+    # Use custom nonce if set (only for testing).
+    nonce = @nonce || Nonce.new.to_slice
     header = Slice(UInt8).new(1, VERSION) + time + nonce
 
     ciphertext = Bytes.new(payload.size + Mac.size)
