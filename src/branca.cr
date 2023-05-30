@@ -16,11 +16,22 @@ struct Branca
     end
   end
 
+  # Creates a new Branca instance.
+  #
+  # Make sure you use a secure encryption key:
+  # ```
+  # key = Bytes.new(32)
+  # Random::Secure.random_bytes(key)
+  # branca = Branca.new key
+  # ```
   def initialize(key : Bytes)
     raise "secret key has to be 32 bytes strong" unless key.size == 32
     @key = StaticArray(UInt8, 32).new { |i| key[i] }
   end
 
+  # Creates a XChaCha20-Poly1305 AEAD encrypted Branca token.
+  #
+  # Returns a Base62 encoded String.
   def encode(payload : String | Bytes, timestamp : UInt32 = Time.utc.to_unix.to_u32) : String
     payload = payload.to_slice
 
@@ -45,6 +56,10 @@ struct Branca
     Base62.encode(token)
   end
 
+  # Decodes a valid Branca token.
+  #
+  # If *ttl* is greater than 0 and the token is expired, an `ExpiredTokenError` is raised.
+  # Returns a {payload, timestamp} Tuple.
   def decode(token : String, ttl : UInt32 = 0) : {Bytes, UInt32}
     bytes = Base62.decode(token).to_s(16).hexbytes
     header_size = 5 + Nonce.size
