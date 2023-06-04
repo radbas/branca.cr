@@ -1,18 +1,29 @@
 require "monocypher"
-require "base62"
+require "multibase/base_62"
 
-struct Branca
-  VERSION = UInt8.new 0xBA
+class Branca
+  VERSION = 0xBA
 
   alias BigEndian = IO::ByteFormat::BigEndian
+  alias Base62 = Multibase::Base62
   alias Nonce = Crypto::Nonce
   alias Mac = Crypto::Header
 
-  class ExpiredTokenError < Exception
-    getter :delta
+  struct Token
+    property :payload, :timestamp
 
-    def initialize(@delta : UInt32)
-      super "token is expired by: #{@delta}s"
+    def initialize(
+      @payload : Bytes = Bytes.empty,
+      @timestamp : UInt32 = Time.utc.to_unix.to_u32
+    )
+    end
+  end
+
+  class ExpiredTokenError < Exception
+    getter :token
+
+    def initialize(@token : Token)
+      super "token is expired"
     end
   end
 
@@ -29,7 +40,7 @@ struct Branca
     @key = StaticArray(UInt8, 32).new { |i| key[i] }
   end
 
-  # Creates a XChaCha20-Poly1305 AEAD encrypted Branca token.
+  # Creates a XChaCha20-Poly1305 AEAD encrypted Branca Token.
   #
   # Returns a Base62 encoded String.
   def encode(payload : String | Bytes, timestamp : UInt32 = Time.utc.to_unix.to_u32) : String
@@ -40,7 +51,7 @@ struct Branca
 
     # Use custom nonce if set (only for testing).
     nonce = @nonce || Nonce.new.to_slice
-    header = Slice(UInt8).new(1, VERSION) + time + nonce
+    header = Slice(UInt8).new(1, VERSION.to_u8) + time + nonce
 
     ciphertext = Bytes.new(payload.size + Mac.size)
     LibMonocypher.aead_lock(
@@ -57,12 +68,15 @@ struct Branca
     Base62.encode(token)
   end
 
-  # Decodes a valid Branca token.
+  def encode(token : Token) : String
+    encode(token.payload, token.timestamp)
+  end
+
+  # Decodes a Base62 encoded Branca Token.
   #
   # If *ttl* is greater than 0 and the token is expired, an `ExpiredTokenError` is raised.
-  # Returns a {payload, timestamp} Tuple.
-  def decode(token : String, ttl : UInt32 = 0) : {Bytes, UInt32}
-    bytes = Base62.decode(token).to_s(16).hexbytes
+  def decode(str : String, ttl : UInt32 = 0) : Token
+    bytes = Base62.decode(str)
     header_size = 5 + Nonce.size
     raise "invalid token header size: got #{bytes.size}, expected #{header_size}" if bytes.size < header_size
 
@@ -87,11 +101,9 @@ struct Branca
     raise "decryption error occurred: #{res}" unless res == 0
 
     timestamp = BigEndian.decode(UInt32, header[1..4])
-    if ttl > 0
-      delta = Time.utc.to_unix - (timestamp + ttl)
-      raise ExpiredTokenError.new delta.to_u32 if delta > 0
-    end
+    token = Token.new(payload, timestamp)
 
-    {payload, timestamp}
+    raise ExpiredTokenError.new token if ttl > 0 && (timestamp + ttl) < Time.utc.to_unix
+    token
   end
 end

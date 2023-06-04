@@ -5,6 +5,6 @@ require "../src/branca"
 #
 # This sets a user defined nonce for testing.
 # Do not do this in production.
-struct Branca
+class Branca
   @nonce = "beefbeefbeefbeefbeefbeefbeefbeefbeefbeefbeefbeef".hexbytes
 end

@@ -1,5 +1,5 @@
 name: branca
-version: 0.2.1
+version: 0.3.0
 
 authors:
   - Johannes Rabausch <mail@jrabausch.de>
@@ -8,8 +8,8 @@ dependencies:
   monocypher:
     github: konovod/monocypher.cr
     version: ~> 4.0.1
-  base62:
-    github: Sija/base62.cr
+  multibase:
+    github: radbas/multibase.cr
 
 development_dependencies:
   ameba:

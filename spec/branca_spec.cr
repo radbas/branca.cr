@@ -59,51 +59,51 @@ describe Branca do
   describe "#decode" do
     it "decodes hello world with zero timestamp" do
       token = "870S4BYxgHw0KnP3W9fgVUHEhT5g86vJ17etaC5Kh5uIraWHCI1psNQGv298ZmjPwoYbjDQ9chy2z"
-      payload, timestamp = branca.decode(token)
-      payload.hexstring.should eq "48656c6c6f20776f726c6421"
-      timestamp.should eq 0
+      res = branca.decode(token)
+      res.payload.hexstring.should eq "48656c6c6f20776f726c6421"
+      res.timestamp.should eq 0
     end
     it "decodes hello world with max timestamp" do
       token = "89i7YCwu5tWAJNHUDdmIqhzOi5hVHOd4afjZcGMcVmM4enl4yeLiDyYv41eMkNmTX6IwYEFErCSqr"
-      payload, timestamp = branca.decode(token)
-      payload.hexstring.should eq "48656c6c6f20776f726c6421"
-      timestamp.should eq 4294967295
+      res = branca.decode(token)
+      res.payload.hexstring.should eq "48656c6c6f20776f726c6421"
+      res.timestamp.should eq 4294967295
     end
     it "decodes hello world with November 27 timestamp" do
       token = "875GH23U0Dr6nHFA63DhOyd9LkYudBkX8RsCTOMz5xoYAMw9sMd5QwcEqLDRnTDHPenOX7nP2trlT"
-      payload, timestamp = branca.decode(token)
-      payload.hexstring.should eq "48656c6c6f20776f726c6421"
-      timestamp.should eq 123206400
+      res = branca.decode(token)
+      res.payload.hexstring.should eq "48656c6c6f20776f726c6421"
+      res.timestamp.should eq 123206400
     end
     it "decodes eight null bytes with zero timestamp" do
       token = "1jIBheHbDdkCDFQmtgw4RUZeQoOJgGwTFJSpwOAk3XYpJJr52DEpILLmmwYl4tjdSbbNqcF1"
-      payload, timestamp = branca.decode(token)
-      payload.hexstring.should eq "0000000000000000"
-      timestamp.should eq 0
+      res = branca.decode(token)
+      res.payload.hexstring.should eq "0000000000000000"
+      res.timestamp.should eq 0
     end
     it "decodes eight null bytes with max timestamp" do
       token = "1jrx6DUu5q06oxykef2e2ZMyTcDRTQot9ZnwgifUtzAphGtjsxfbxXNhQyBEOGtpbkBgvIQx"
-      payload, timestamp = branca.decode(token)
-      payload.hexstring.should eq "0000000000000000"
-      timestamp.should eq 4294967295
+      res = branca.decode(token)
+      res.payload.hexstring.should eq "0000000000000000"
+      res.timestamp.should eq 4294967295
     end
     it "decodes eight null bytes with November 27th timestamp" do
       token = "1jJDJOEjuwVb9Csz1Ypw1KBWSkr0YDpeBeJN6NzJWx1VgPLmcBhu2SbkpQ9JjZ3nfUf7Aytp"
-      payload, timestamp = branca.decode(token)
-      payload.hexstring.should eq "0000000000000000"
-      timestamp.should eq 123206400
+      res = branca.decode(token)
+      res.payload.hexstring.should eq "0000000000000000"
+      res.timestamp.should eq 123206400
     end
     it "decodes empty payload" do
       token = "4sfD0vPFhIif8cy4nB3BQkHeJqkOkDvinI4zIhMjYX4YXZU5WIq9ycCVjGzB5"
-      payload, timestamp = branca.decode(token)
-      payload.hexstring.should eq ""
-      timestamp.should eq 0
+      res = branca.decode(token)
+      res.payload.hexstring.should eq ""
+      res.timestamp.should eq 0
     end
     it "decodes non-UTF8 payload" do
       token = "K9u6d0zjXp8RXNUGDyXAsB9AtPo60CD3xxQ2ulL8aQoTzXbvockRff0y1eXoHm"
-      payload, timestamp = branca.decode(token)
-      payload.hexstring.should eq "80"
-      timestamp.should eq 123206400
+      res = branca.decode(token)
+      res.payload.hexstring.should eq "80"
+      res.timestamp.should eq 123206400
     end
     it "throws with wrong version 0xBB" do
       token = "89mvl3RkwXjpEj5WMxK7GUDEHEeeeZtwjMIOogTthvr44qBfYtQSIZH5MHOTC0GzoutDIeoPVZk3w"
