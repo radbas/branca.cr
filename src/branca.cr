@@ -51,7 +51,7 @@ class Branca
 
     # Use custom nonce if set (only for testing).
     nonce = @nonce || Nonce.new.to_slice
-    header = Slice(UInt8).new(1, VERSION.to_u8) + time + nonce
+    header = Bytes.new(1, VERSION.to_u8) + time + nonce
 
     ciphertext = Bytes.new(payload.size + Mac.size)
     LibMonocypher.aead_lock(
@@ -103,7 +103,7 @@ class Branca
     timestamp = BigEndian.decode(UInt32, header[1..4])
     token = Token.new(payload, timestamp)
 
-    raise ExpiredTokenError.new token if ttl > 0 && (timestamp + ttl) < Time.utc.to_unix
+    raise ExpiredTokenError.new(token) if ttl > 0 && (timestamp + ttl) < Time.utc.to_unix
     token
   end
 end
