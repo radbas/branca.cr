@@ -7,7 +7,7 @@ class Branca
   alias BigEndian = IO::ByteFormat::BigEndian
   alias Base62 = Multibase::Base62
   alias Nonce = Crypto::Nonce
-  alias Mac = Crypto::Header
+  alias MAC = Crypto::MAC
 
   struct Token
     property :payload, :timestamp
@@ -53,10 +53,10 @@ class Branca
     nonce = @nonce || Nonce.new.to_slice
     header = Bytes.new(1, VERSION.to_u8) + time + nonce
 
-    ciphertext = Bytes.new(payload.size + Mac.size)
+    ciphertext = Bytes.new(payload.size + MAC.size)
     LibMonocypher.aead_lock(
       ciphertext[0, payload.size],
-      ciphertext[payload.size, Mac.size],
+      ciphertext[payload.size, MAC.size],
       @key,
       nonce,
       header,
@@ -87,10 +87,10 @@ class Branca
     nonce = header[5..-1]
     ciphertext = bytes[header.size..-1]
 
-    payload = Bytes.new(ciphertext.size - Mac.size)
+    payload = Bytes.new(ciphertext.size - MAC.size)
     res = LibMonocypher.aead_unlock(
       payload,
-      ciphertext[payload.size, Mac.size],
+      ciphertext[payload.size, MAC.size],
       @key,
       nonce,
       header,
